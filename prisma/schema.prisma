@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Gender {
+  MEN
+  WOMEN
+  UNISEX
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+  REFUNDED
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          Role      @default(USER)
+  address       Json?     // { line1, line2, city, postalCode, country }
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  orders   Order[]
+  reviews  Review[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ─── Catalog ─────────────────────────────────────────────────────────────
+
+/// Two-level tree: top-level departments ("mens-footwear") and
+/// subcategories ("mens-running"). Gender lives on the product so apparel
+/// and accessories can be UNISEX without duplicating the tree.
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  parentId  String?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  sortOrder Int        @default(0)
+  products  Product[]
+}
+
+model Product {
+  id                  String   @id @default(cuid())
+  name                String
+  slug                String   @unique
+  tagline             String
+  description         String   @db.Text
+  basePrice           Int      // minor units (cents) — never floats for money
+  gender              Gender
+  categoryId          String
+  category            Category @relation(fields: [categoryId], references: [id])
+  materials           String[]
+  sustainabilityRating Int     // 0–100 eco-impact score
+  carbonKg            Decimal  @db.Decimal(5, 2)
+  careInstructions    String[]
+  specs               Json     // Record<string, string>
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  variants ProductVariant[]
+  reviews  Review[]
+
+  @@index([categoryId])
+  @@index([gender])
+  @@index([materials], type: Gin)
+}
+
+model ProductVariant {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku           String   @unique
+  size          String
+  color         String
+  colorHex      String
+  stockQuantity Int      @default(0)
+  priceOverride Int?
+  images        String[]
+
+  orderItems OrderItem[]
+
+  @@unique([productId, color, size])
+  @@index([productId, color])
+  @@index([size])
+}
+
+// ─── Commerce ────────────────────────────────────────────────────────────
+
+model Order {
+  id                    String      @id @default(cuid())
+  userId                String?
+  user                  User?       @relation(fields: [userId], references: [id])
+  email                 String
+  status                OrderStatus @default(PENDING)
+  subtotalAmount        Int
+  shippingAmount        Int
+  totalAmount           Int
+  currency              String      @default("usd")
+  stripeCheckoutId      String?     @unique
+  stripePaymentIntentId String?     @unique
+  shippingAddress       Json?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status, createdAt])
+}
+
+/// Snapshot columns (name/size/color/unitPrice) keep historical orders
+/// accurate even after a product is edited or deleted.
+model OrderItem {
+  id          String          @id @default(cuid())
+  orderId     String
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  productName String
+  size        String
+  color       String
+  unitPrice   Int
+  quantity    Int
+}
+
+model Review {
+  id               String   @id @default(cuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating           Int      // 1–5, enforced in zod + CHECK constraint via migration
+  title            String?
+  comment          String   @db.Text
+  verifiedPurchase Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@unique([productId, userId])
+  @@index([productId, createdAt])
+}
