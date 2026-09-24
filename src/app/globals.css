@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+/* Flybirds tokens — slate / forest / bone, with a mono accent voice. */
+@theme {
+  --color-slate-950: #121619;
+  --color-slate-900: #1C2226;
+  --color-slate-800: #2B3136;
+  --color-slate-600: #4F585E;
+  --color-slate-400: #8A9398;
+  --color-bone-50: #FAF8F3;
+  --color-bone-100: #F3EFE6;
+  --color-bone-200: #E6E0D3;
+  --color-forest-700: #2F4533;
+  --color-forest-500: #4B6B4F;
+  --color-forest-300: #9DB59F;
+  --color-signal: #D9772B;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html { @apply bg-bone-50 text-slate-900 antialiased; }
+  ::selection { @apply bg-forest-500 text-bone-50; }
+  :focus-visible { @apply outline-2 outline-offset-2 outline-forest-500; }
+}
+
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@keyframes expand { from { height: 0 } to { height: var(--radix-accordion-content-height) } }
+@keyframes collapse { from { height: var(--radix-accordion-content-height) } to { height: 0 } }
