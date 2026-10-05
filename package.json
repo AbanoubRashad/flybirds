@@ -12,7 +12,9 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "build:demo": "node scripts/build-demo.mjs",
+    "deploy:demo": "npm run build:demo && firebase deploy --only hosting"
   },
   "prisma": { "seed": "tsx prisma/seed.ts" },
   "dependencies": {

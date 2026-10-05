@@ -1,5 +1,10 @@
 node_modules
 .next
+
+# static demo build (npm run build:demo)
+out
+.demo-build
+.firebase
 .env
 .env.local
 *.tsbuildinfo

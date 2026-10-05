@@ -1,0 +1,51 @@
+name: Live demo
+
+on:
+  push:
+    branches: [main, live-demo]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      HAS_FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Typecheck the full app
+        run: npx prisma generate && npm run typecheck
+
+      - name: Build the static demo
+        run: npm run build:demo
+
+      - name: Smoke-check the export
+        run: |
+          for f in index collections/mens-footwear collections/accessories products/mens-ridgeline-trainer search admin sign-in 404; do
+            test -f "out/$f.html" || { echo "missing out/$f.html"; exit 1; }
+          done
+          grep -q "Ridgeline Trainer" out/collections/mens-footwear.html
+          grep -q "Low-stock alerts" out/admin.html
+          du -sh out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: demo-out
+          path: out
+          retention-days: 7
+
+      # Optional: add a FIREBASE_SERVICE_ACCOUNT repo secret to deploy on every push to main.
+      - name: Deploy to Firebase Hosting
+        if: github.ref == 'refs/heads/main' && env.HAS_FIREBASE_SA == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: abanoub--rashad
+          channelId: live
