@@ -3,7 +3,7 @@
 A production-grade DTC footwear storefront built as a senior full-stack portfolio piece.
 Next.js App Router · TypeScript (strict + `noUncheckedIndexedAccess`) · Prisma/Postgres · Auth.js v5 RBAC · Zustand + TanStack Query · Tailwind v4 · Framer Motion.
 
-**Live demo:** not hosted yet — it needs a Node server and PostgreSQL (see Quick start to run it locally).  ·  **Portfolio:** https://abanoub--rashad.web.app
+**Live demo:** https://flybirds-store.web.app (static preview — see [Live demo](#live-demo))  ·  **Portfolio:** https://abanoub--rashad.web.app
 
 ## Screenshots
 
@@ -32,6 +32,22 @@ npm run dev
 ```
 
 Demo admin: `admin@flybirds.dev` / `flybirds-demo`
+
+## Live demo
+
+https://flybirds-store.web.app is a static export of the same UI, hosted on Firebase like the rest of the portfolio. The full app needs a Node server and PostgreSQL, so `npm run build:demo` builds a variant that:
+
+- reads the catalog in memory from `prisma/catalog.ts` (the same data `db:seed` writes, so stock and reviews match);
+- prerenders every collection and product page, then applies faceted filters, sort and search in the browser from the URL;
+- keeps the optimistic cart client-only (no server reconciliation);
+- shows the ops page read-only and replaces sign-in with an explainer (Auth.js needs the server).
+
+The demo-only files live in `demo/overlay/` and are laid over a temporary copy of the app, so the real code paths stay untouched.
+
+```bash
+npm run build:demo     # → ./out
+npm run deploy:demo    # build + firebase deploy (site: flybirds-store)
+```
 
 ## Architecture
 

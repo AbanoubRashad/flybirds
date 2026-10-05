@@ -32,7 +32,9 @@ jobs:
           done
           grep -q "Ridgeline Trainer" out/collections/mens-footwear.html
           grep -q "Low-stock alerts" out/admin.html
-          du -sh out
+          grep -q "Field notes" out/products/mens-ridgeline-trainer.html
+          grep -q "static preview" out/sign-in.html
+          echo "::notice title=Demo size::total $(du -sh out | cut -f1); home $(du -h out/index.html | cut -f1); mens-footwear $(du -h out/collections/mens-footwear.html | cut -f1); search $(du -h out/search.html | cut -f1); product $(du -h out/products/mens-ridgeline-trainer.html | cut -f1); pages $(find out -name '*.html' | wc -l)"
 
       - uses: actions/upload-artifact@v4
         with:
