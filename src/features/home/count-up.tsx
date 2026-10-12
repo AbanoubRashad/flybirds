@@ -1,6 +1,6 @@
 "use client";
 
-import { animate, useInView, useReducedMotion } from "framer-motion";
+import { animate, useInView, useReducedMotion, type UseInViewOptions } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { EASE } from "@/lib/motion";
 
@@ -19,9 +19,9 @@ const format = (n: number, { decimals = 0, prefix = "", suffix = "" }: Format) =
  * readers always get the final value; the ticking digits are aria-hidden.
  * Digits are written straight to the DOM so React doesn't re-render per frame.
  */
-export function CountUp({ to, decimals, prefix, suffix, duration = 1.8, className }: { to: number; duration?: number; className?: string } & Format) {
+export function CountUp({ to, decimals, prefix, suffix, duration = 1.8, margin = "0px 0px -10% 0px", className }: { to: number; duration?: number; margin?: UseInViewOptions["margin"]; className?: string } & Format) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
+  const inView = useInView(ref, { once: true, margin });
   const reduce = useReducedMotion();
   const opts = useRef<Format>({ decimals, prefix, suffix });
   opts.current = { decimals, prefix, suffix };
