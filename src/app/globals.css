@@ -65,6 +65,8 @@
 }
 
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+/* Hero scroll cue: a short bar travels down its track. */
+@keyframes scroll-cue { from { transform: translateY(-100%); } to { transform: translateY(200%); } }
 /* Accordion content fades/slides (compositor-only) rather than animating height. */
 @keyframes acc-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @keyframes acc-out { from { opacity: 1; } to { opacity: 0; } }
