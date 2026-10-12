@@ -7,6 +7,8 @@ const schema = z.object({
   AUTH_GITHUB_ID: z.string().optional(),
   AUTH_GITHUB_SECRET: z.string().optional(),
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+  // Optional: the storefront boots without it; /api/ask returns 503 until it's set.
+  PERPLEXITY_API_KEY: z.string().min(1).optional(),
 });
 
 export const env = schema.parse(process.env);

@@ -21,3 +21,6 @@ CLAUDE.md
 .vercel
 .env*
 !.env.example
+
+# Claude Code local state (worktrees, local settings)
+.claude/

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BadgeCheck, Star } from "lucide-react";
+import { AskPanel } from "@/features/product/ask-panel";
 import { ProductExperience } from "@/features/product/product-experience";
 import { getProductBySlug } from "@/server/queries/products";
 
@@ -56,6 +57,8 @@ export default async function ProductPage({ params, searchParams }: Props) {
           </ul>
         </div>
       </section>
+
+      <AskPanel productName={product.name} tagline={product.tagline} />
     </div>
   );
 }

@@ -25,6 +25,7 @@ const REMOVE = [
   "src/types/next-auth.d.ts",
   "src/lib/db.ts",
   "src/lib/env.ts",
+  "src/server/perplexity.ts",
   "prisma/seed.ts",
 ];
 
