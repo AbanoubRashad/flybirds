@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:search": "prisma db execute --file prisma/sql/search.sql --schema prisma/schema.prisma",
     "db:studio": "prisma studio",
     "build:demo": "node scripts/build-demo.mjs",
     "deploy:demo": "npm run build:demo && firebase deploy --only hosting",

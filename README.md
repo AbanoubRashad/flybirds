@@ -85,6 +85,6 @@ src/
 
 - [x] **Phase 1** — schema, seed, design system, catalog + faceted filters, PDP, optimistic cart, auth/RBAC
 - [x] **Phase 2** — checkout: `startCheckout` re-prices the cart and saves a PENDING order, Stripe Checkout Session (or a sandbox page when no key is set), signed webhook at `/api/webhooks/stripe` with an idempotent stock decrement, refunds that restock, order confirmation and `/account/orders`
-- [ ] **Phase 3** — search overlay (debounced autocomplete via TanStack Query), Postgres full-text + trigram index
+- [x] **Phase 3** — search: ranked in Postgres (weighted full-text prefix match + trigram similarity for typos, indexes in `prisma/sql/search.sql`, `npm run db:search`), `/api/search` suggestions, and a combobox overlay with debounced TanStack Query, arrow keys and Enter
 - [ ] **Phase 4** — admin dashboard: product/variant data tables, order status overrides, Recharts revenue analytics
 - [ ] **Phase 5** — Vitest + Playwright, CI, reviews write-path with verified-purchase check

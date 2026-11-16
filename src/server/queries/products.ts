@@ -3,6 +3,7 @@ import { cache } from "react";
 import { Prisma, type Gender } from "@prisma/client";
 import { db } from "@/lib/db";
 import { compareSizes } from "@/lib/sizes";
+import { searchProductIds } from "./search";
 
 export { SORTS, catalogParamsSchema, parseCatalogParams, type CatalogParams } from "./catalog-params";
 import type { CatalogParams } from "./catalog-params";
@@ -37,6 +38,9 @@ export async function getCatalog(departmentSlug: string | null, p: CatalogParams
     ...(p.color.length > 0 && { color: { in: p.color } }),
   };
 
+  // Text search is ranked in SQL (full-text + trigram, see ./search.ts); the other filters narrow that set.
+  const hits = p.q ? await searchProductIds(p.q) : null;
+
   const where: Prisma.ProductWhereInput = {
     isActive: true,
     ...(categoryIds && { categoryId: { in: categoryIds } }),
@@ -44,13 +48,7 @@ export async function getCatalog(departmentSlug: string | null, p: CatalogParams
     ...(p.material.length > 0 && { materials: { hasSome: p.material } }),
     ...((p.min !== undefined || p.max !== undefined) && { basePrice: { gte: p.min, lte: p.max } }),
     ...(Object.keys(variantWhere).length > 0 && { variants: { some: variantWhere } }),
-    ...(p.q && {
-      OR: [
-        { name: { contains: p.q, mode: "insensitive" } },
-        { tagline: { contains: p.q, mode: "insensitive" } },
-        { materials: { has: p.q } },
-      ],
-    }),
+    ...(hits && { id: { in: hits.map((h) => h.id) } }),
   };
 
   const orderBy: Prisma.ProductOrderByWithRelationInput[] = {
@@ -71,6 +69,10 @@ export async function getCatalog(departmentSlug: string | null, p: CatalogParams
     db.productVariant.findMany({ where: { product: facetScope }, distinct: ["color"], select: { color: true, colorHex: true } }),
     db.product.findMany({ where: facetScope, select: { materials: true } }),
   ]);
+
+  // "Featured" on a search means best match first.
+  const rank = hits && p.sort === "featured" ? new Map(hits.map((h, i) => [h.id, i])) : null;
+  if (rank) products.sort((x, y) => (rank.get(x.id) ?? 0) - (rank.get(y.id) ?? 0));
 
   return {
     department: dept,
@@ -101,13 +103,3 @@ export const getProductBySlug = cache(async (slug: string) => {
   return { ...product, carbonKg: Number(product.carbonKg), avgRating: agg._avg.rating ?? 0 };
 });
 export type ProductDetail = NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>;
-
-/** Lightweight autocomplete (used by the search overlay in Phase 3). */
-export async function suggestProducts(q: string) {
-  if (q.trim().length < 2) return [];
-  return db.product.findMany({
-    where: { isActive: true, name: { contains: q, mode: "insensitive" } },
-    select: { name: true, slug: true, basePrice: true },
-    take: 6,
-  });
-}
