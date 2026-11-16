@@ -35,6 +35,8 @@ const REMOVE = [
   "src/server/orders.ts",
   "src/server/queries/orders.ts",
   "src/server/actions/sandbox-payment.ts",
+  // Ranked search runs in Postgres; the demo filters its in-memory catalog instead.
+  "src/server/queries/search.ts",
   "prisma/seed.ts",
 ];
 
