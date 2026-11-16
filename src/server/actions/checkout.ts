@@ -15,7 +15,7 @@ const linesSchema = z
 
 export type StartCheckoutResult =
   | { ok: true; url: string }
-  | { ok: false; error: "invalid" | "cart_changed" | "payment_unavailable"; problems?: CartProblem[] };
+  | { ok: false; error: "invalid" | "cart_changed" | "payment_unavailable" | "demo"; problems?: CartProblem[] };
 
 /** The site's own origin, for Stripe's return URLs. Prefer the request's host so previews work. */
 async function origin() {

@@ -46,6 +46,8 @@ export function CartDrawer() {
         // Pull live stock and prices into the drawer so the customer sees what changed.
         applyServer(await reconcileCart(requested));
         setCheckoutError("Some items changed while you were shopping. Check your cart and try again.");
+      } else if (result.error === "demo") {
+        setCheckoutError("Checkout is switched off in this static preview. Run the full app to try it.");
       } else {
         setCheckoutError("Checkout is not available right now. Please try again in a moment.");
       }

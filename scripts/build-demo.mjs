@@ -26,6 +26,15 @@ const REMOVE = [
   "src/lib/db.ts",
   "src/lib/env.ts",
   "src/server/perplexity.ts",
+  // Checkout and orders need a database and a payment provider.
+  "src/app/(shop)/checkout",
+  "src/app/(shop)/account",
+  "src/features/checkout",
+  "src/server/checkout",
+  "src/server/stripe.ts",
+  "src/server/orders.ts",
+  "src/server/queries/orders.ts",
+  "src/server/actions/sandbox-payment.ts",
   "prisma/seed.ts",
 ];
 
