@@ -84,7 +84,7 @@ src/
 ## Roadmap
 
 - [x] **Phase 1** — schema, seed, design system, catalog + faceted filters, PDP, optimistic cart, auth/RBAC
-- [ ] **Phase 2** — Stripe Checkout Session action, signed webhook (`/api/webhooks/stripe`) with idempotent stock decrement, refunds, order confirmation
+- [x] **Phase 2** — checkout: `startCheckout` re-prices the cart and saves a PENDING order, Stripe Checkout Session (or a sandbox page when no key is set), signed webhook at `/api/webhooks/stripe` with an idempotent stock decrement, refunds that restock, order confirmation and `/account/orders`
 - [ ] **Phase 3** — search overlay (debounced autocomplete via TanStack Query), Postgres full-text + trigram index
 - [ ] **Phase 4** — admin dashboard: product/variant data tables, order status overrides, Recharts revenue analytics
 - [ ] **Phase 5** — Vitest + Playwright, CI, reviews write-path with verified-purchase check

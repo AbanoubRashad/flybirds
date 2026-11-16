@@ -3,7 +3,9 @@
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { reconcileCart } from "@/server/actions/cart";
+import { startCheckout } from "@/server/actions/checkout";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/ui/product-image";
 import { useDialog } from "@/components/layout/use-dialog";
@@ -25,6 +27,33 @@ export function CartDrawer() {
   const subtotal = useCart(selectSubtotal);
   const { isSyncing, notices, dismiss } = useCartSync();
   const panelRef = useDialog<HTMLElement>(isOpen, close);
+  const applyServer = useCart((s) => s.applyServer);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  /** Hand the cart to the server; it re-prices everything and returns where to pay. */
+  async function checkout() {
+    const requested = lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity }));
+    setCheckingOut(true);
+    setCheckoutError(null);
+    try {
+      const result = await startCheckout(requested);
+      if (result.ok) {
+        window.location.assign(result.url);
+        return;
+      }
+      if (result.error === "cart_changed") {
+        // Pull live stock and prices into the drawer so the customer sees what changed.
+        applyServer(await reconcileCart(requested));
+        setCheckoutError("Some items changed while you were shopping. Check your cart and try again.");
+      } else {
+        setCheckoutError("Checkout is not available right now. Please try again in a moment.");
+      }
+    } catch {
+      setCheckoutError("Something went wrong. Please try again.");
+    }
+    setCheckingOut(false);
+  }
 
   if (!hydrated) return null;
 
@@ -129,10 +158,11 @@ export function CartDrawer() {
                   <span className="label-mono text-muted">Subtotal</span>
                   <span className="font-serif text-[30px] leading-none tabular-nums">{formatPrice(subtotal)}</span>
                 </div>
-                {/* Stripe Checkout Session server action lands in Phase 2 */}
-                <Button size="lg" variant="forest" className="group w-full" disabled={isSyncing}>
-                  Checkout <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+                <Button size="lg" variant="forest" className="group w-full" disabled={isSyncing || checkingOut} onClick={checkout}>
+                  {checkingOut ? "Taking you to checkout…" : "Checkout"}
+                  <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
                 </Button>
+                {checkoutError && <p role="alert" className="text-center text-sm text-slate">{checkoutError}</p>}
                 <p className="label-mono text-center text-muted">Free returns · 30-day wear test</p>
               </footer>
             )}

@@ -9,5 +9,7 @@ export type Cents = number;
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 export const formatPrice = (cents: Cents) => usd.format(cents / 100);
 
+/** Flat rate below the free-shipping threshold. */
+export const STANDARD_SHIPPING: Cents = 800;
 export const FREE_SHIPPING_THRESHOLD: Cents = 7500;
 export const EXPRESS_SHIPPING_THRESHOLD: Cents = 15000;

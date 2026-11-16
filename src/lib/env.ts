@@ -9,6 +9,9 @@ const schema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
   // Optional: the storefront boots without it; /api/ask returns 503 until it's set.
   PERPLEXITY_API_KEY: z.string().min(1).optional(),
+  // Optional: without a Stripe key, checkout runs in sandbox mode (see src/server/stripe.ts).
+  STRIPE_SECRET_KEY: z.string().startsWith("sk_").optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_").optional(),
 });
 
 export const env = schema.parse(process.env);
