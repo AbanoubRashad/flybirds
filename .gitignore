@@ -24,3 +24,6 @@ CLAUDE.md
 
 # Claude Code local state (worktrees, local settings)
 .claude/
+test-results/
+playwright-report/
+tests/.auth/

@@ -81,10 +81,22 @@ src/
 | Shallow `history.replaceState` for colorway | Shareable URL without an RSC round-trip |
 | Edge-safe `auth.config.ts` split | Middleware runs RBAC on the edge without Prisma/bcrypt |
 
+## Tests
+
+```bash
+docker compose up -d db                 # local Postgres; tests refuse a hosted DATABASE_URL
+export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/flybirds
+npx prisma db push && npm run db:search && npm run db:seed
+npm test                                # unit + integration (Vitest)
+npm run dev & npm run test:e2e          # browser journeys (Playwright), E2E_BASE_URL defaults to :3000
+```
+
+Checkout runs in **sandbox mode** when `STRIPE_SECRET_KEY` is not set: a local page stands in for Stripe's hosted checkout and sends a correctly signed event to the real webhook. Add `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` (from `stripe listen` or the dashboard) to use Stripe itself.
+
 ## Roadmap
 
 - [x] **Phase 1** — schema, seed, design system, catalog + faceted filters, PDP, optimistic cart, auth/RBAC
 - [x] **Phase 2** — checkout: `startCheckout` re-prices the cart and saves a PENDING order, Stripe Checkout Session (or a sandbox page when no key is set), signed webhook at `/api/webhooks/stripe` with an idempotent stock decrement, refunds that restock, order confirmation and `/account/orders`
 - [x] **Phase 3** — search: ranked in Postgres (weighted full-text prefix match + trigram similarity for typos, indexes in `prisma/sql/search.sql`, `npm run db:search`), `/api/search` suggestions, and a combobox overlay with debounced TanStack Query, arrow keys and Enter
 - [x] **Phase 4** — ops dashboard: 30-day revenue chart (Recharts) and KPIs, orders table with status filter and overrides (ship, cancel, refund with restock), products table with per-variant stock editing and a hide/show switch; every action re-checks the admin role
-- [ ] **Phase 5** — Vitest + Playwright, CI, reviews write-path with verified-purchase check
+- [x] **Phase 5** — reviews write-path (one per customer, "verified buyer" decided on the server from paid orders); Vitest unit + integration tests (pricing, search terms, idempotent order transitions under concurrency, signed webhook); Playwright journeys (guest purchase, cancel, forged webhook, search, signed-in purchase + verified review, admin); CI runs all of it against a Postgres service

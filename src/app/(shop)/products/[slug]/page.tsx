@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BadgeCheck, Star } from "lucide-react";
 import { AskPanel } from "@/features/product/ask-panel";
 import { ProductExperience } from "@/features/product/product-experience";
+import { ReviewForm } from "@/features/product/review-form";
 import { getProductBySlug } from "@/server/queries/products";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ color?: string }> };
@@ -55,6 +56,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               </li>
             ))}
           </ul>
+          <ReviewForm productId={product.id} productName={product.name} />
         </div>
       </section>
 

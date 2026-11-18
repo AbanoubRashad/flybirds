@@ -41,6 +41,9 @@ const REMOVE = [
   "src/features/admin",
   "src/server/actions/admin.ts",
   "src/server/queries/admin.ts",
+  // Writing reviews needs a signed-in user and the database.
+  "src/features/product/review-form.tsx",
+  "src/server/actions/reviews.ts",
   // Ranked search runs in Postgres; the demo filters its in-memory catalog instead.
   "src/server/queries/search.ts",
   "prisma/seed.ts",
