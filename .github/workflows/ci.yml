@@ -25,6 +25,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/flybirds
       AUTH_SECRET: ci-only-secret-at-least-sixteen-chars
+      # Auth.js only trusts the request host in production when told to (Vercel sets this itself).
+      AUTH_TRUST_HOST: "true"
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       E2E_BASE_URL: http://localhost:3000
     steps:
